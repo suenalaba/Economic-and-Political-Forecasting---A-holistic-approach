@@ -2,278 +2,307 @@ library(data.table)
          # Install psych package
 library("psych")
 
-###############################################################Cleaning
-Htable = fread("2020_Statistical_Annex_Table_1.csv")
-Htable
-
-#HDI is the geometric mean (equally-weighted) of life expectancy, education, and GNI per capita
-
-edu = fread("Education index.csv",fill = TRUE,header=TRUE)
-inc = fread("Income index.csv",fill = TRUE,header=TRUE)
-lif = fread("Life expectancy index.csv",fill = TRUE,header=TRUE)
-
-edu$Country
-head(edu)
-eduA= edu[Country==" Argentina",]
-summary(eduA)
-if (!require("tidyverse")) install.packages("tidyverse")
-eduA=eduA %>% discard(~all(is.na(.) | . ==""))
-eduA$`HDI Rank`="Education Index"
-head(eduA)
-
-incA = inc[Country=="Argentina",]
-incA=incA %>% discard(~all(is.na(.) | . ==""))
-summary(incA)
-incA$`HDI Rank`="Income Index"
-
-lifA = lif[Country == "Argentina",]
-lifA=lifA %>% discard(~all(is.na(.) | . ==""))
-summary(lifA)
-lifA$`HDI Rank`="Life Expectency Index"
-
-temp=rbind(eduA,incA)
-clean1 = rbind(temp,lifA)
-head(clean1)
-
-names(clean1)[1]="Indexes"
-class(clean1)
-
-clean1$Country=NULL
-
-clean2 = t(clean1)
-
-head(clean2)
-
-labels(clean2)
-
-
-
-data_new <- clean2                         # Duplicate data frame
-colnames(data_new) <- clean2[1, ]          # Convert first row to header
-head(data_new)              
-
-data_new <- data_new[- 1, ]  
-
-
-
-arr = c();
-y=1990
-for(x in 1:30) 
-{
-  arr[x]=y
-  y=y+1
-}
-
-class(data)
-data <- as.data.frame(data_new)
-setDT(data) 
-colnames(data) <- c("Education_Index", "Income_Index", "Life_Expectency_Index")
-data$Year = arr
-
-summary(data)
-head(data)
-
-sum(is.na(data)) 
-## No Nulls
-
-data <- data[ , Education_Index := as.numeric(Education_Index)]
-data <- data[ , Income_Index := as.numeric(Income_Index)]
-data <- data[ , Life_Expectency_Index := as.numeric(Life_Expectency_Index)]
-
-#data[,HDI:=geometric.mean(c(Education_Index,Income_Index,Life_Expectnecy_Index))]
-#c(Education_Index,Income_Index,Life_Expectnecy_Index)
-#geometric.mean(data[12,c(Education_Index,Income_Index,Life_Expectnecy_Index)])
-#data$HDI=geometric.mean(c(data$Education_Index,data$Income_Index,data$Life_Expectnecy_Index))
-
-for(x in 1:30){
-  data$HDI[x]=geometric.mean(data[x,c(Education_Index,Income_Index,Life_Expectency_Index)])
-}
-colnames(data) <- c("Education_Index", "Income_Index", "Life_Expectency_Index","Year","HDI")
-data
-
-
-
-data1=data
-
-
-shift <- function(x, n){
-  c(x[-(seq(n))], rep(NA, n))
-}
-
-data1$HDI <- shift(data1$HDI, 4)
-
-data1=data1[order(-data1$Year)]
-
-data1
-
-arr = c();
-y=2023
-for(x in 1:30) 
-{
-  arr[x]=y
-  y=y-1
-}
-arr
-
-data1$pred_Year=arr
-
-data1
-
-wdata=data1[c(5:30),]
-
-wdata
-
-#write.csv(data,"C:\\NTU\\Business\\Y2S1\\Analytics\\AY21 Team Assignment and Project\\Argentina HDI.csv", row.names = FALSE)
-
-
 
 #####################################################################exploration
 library(ggplot2)
+wdata = fread("wdata.csv")
 summary(wdata)
+wdata
 
+##boxplot
+
+ggplot(data=wdata,aes(x=year,y=Education_Index))+geom_point()+labs(title="Year vs Education_Index")
+
+ggplot(data=wdata,aes(x=year,y=Income_Index))+geom_point()+labs(title="Year vs Income_Index")
+
+ggplot(data=wdata,aes(x=year,y=Life_Expectency_Index))+geom_point()+labs(title="Year vs Life_Expectency_Index")
+
+ggplot(data=wdata,aes(x=year,y=HDI))+geom_point()+labs(title="Year vs HDI")
+
+
+##correlation of indexes to HDI in 5 years
 ggplot(data=wdata,aes(x = Education_Index,y=HDI))+geom_point()+labs(title="HDI vs Education_Index")
+cor(wdata$HDI, wdata$Education_Index)
 
 ggplot(data=wdata,aes(x = Income_Index,y=HDI))+geom_point()+labs(title="HDI vs Income_Index")
+cor(wdata$HDI, wdata$Income_Index)
 
 ggplot(data=wdata,aes(x = Life_Expectency_Index,y=HDI))+geom_point()+labs(title="HDI vs Life_Expectency_Index")
+cor(wdata$HDI, wdata$Life_Expectency_Index)
 
 library(corrplot)
 corrplot(cor(wdata), type = "upper")
 
-plot(wdata$HDI, wdata$Education_Index)
-cor(wdata$HDI, wdata$Education_Index)
 
-plot(wdata$HDI, wdata$Income_Index)
-cor(wdata$HDI, wdata$Income_Index)
 
-plot(wdata$HDI, wdata$Life_Expectency_Index)
-cor(wdata$HDI, wdata$Life_Expectency_Index)
+
 #############################################################Regression
 
-#uses all data in set to generate regression
+#uses all data in set to generate regression, aim to predict 2015-2019
 
-m1 <- lm(HDI ~ Education_Index+Income_Index+Life_Expectency_Index, data = wdata)
+wdata
+wdata1= wdata[c(6:25),] #use date before 2010
+wdata2 = wdata[c(1:5),] #values for 2010-2014 to predict 2015-2019
+wdata1
+wdata2
+
+
+m1 <- lm(HDI ~ Education_Index+Income_Index+Life_Expectency_Index, data = wdata1)
 summary(m1)
-#only life expectency index significant, so only use that as predictor
 
-m2 <- lm(HDI ~ Life_Expectency_Index, data = wdata)
-summary(m2)
+library(car)
+vif(m1) #colinearity present between life expectancy and education, hence remove education index
 
-#m3 <- lm(HDI ~ Income_Index, data = wdata)
-#summary(m3)
-#m4 <- lm(HDI ~ Education_Index, data = wdata)
-#summary(m4)
-#m5 <- lm(HDI ~ Education_Index+Life_Expectency_Index, data = wdata)
-#summary(m5)
-#m6 <- lm(HDI ~ Income_Index+Life_Expectency_Index, data = wdata)
-#summary(m6)
-#m7 <- lm(HDI ~ Education_Index+Income_Index, data = wdata)
-#summary(m7)
-#d1 <- lm(HDI ~ Education_Index+Income_Index+Life_Expectency_Index, data = data)
-#summary(d1)
+m2 <- lm(HDI ~ Life_Expectency_Index+Income_Index, data = wdata1)
+summary(m2) #only life expectancy index significant, so only use that as predictor
+vif(m2)
 
-data
-class(data)
 
-test.hdi=predict(m2,newdata=wdata)
-error=wdata$HDI-test.hdi
+m3 <- lm(HDI ~ Life_Expectency_Index, data = wdata1)
+summary(m3)
+
+par(mfrow = c(2,2))
+plot(m3)
+par(mfrow = c(1,1))
+
+
+test.hdi=predict(m3,newdata=wdata2) #using 2010-2014 data
+error=wdata2$HDI-test.hdi
 
 RMSE <- sqrt(mean(error^2))
 summary(abs(error))
 
 RMSE
+##Only 1 variable, but we learn that health is the most signifacnt factor in predicting HDI in 5 years, hence now we find predictos
+##that might affect LE and use that to predict HDI
+
+#################################################using LE factors as predictors
+data = fread("data.csv")
+names(data)[4]="year"
+dataLE = data
+dataLE$Education_Index=NULL
+dataLE$Income_Index=NULL
+dataLE$Life_Expectency_Index=NULL
+dataLE
+
+LE = fread("LE factors.csv")
+LE$hdi=NULL
+
+LE=merge(x = LE, y = dataLE, by = "year", all = TRUE)
+LE
+
+LE1 = LE[!is.na(LE$HDI), ]   
+LE2=LE1
+LE2$HDI= shift(LE1$HDI, 5)
+LE2
+
+LE3=LE2[order(-LE2$year)]
+
+
+LE4=LE3[year<2014,]
+LE4 = LE4[!is.na(LE4$HDI), ]  
+LE4
 
 
 
-pred=data[27:30]
-pred
+LE4
 
-pred.hdi = predict(m2,newdata=pred)
-pred$pred_HDI=pred.hdi
 
-pred$HDI=NULL
-pred$pred_year = c(2020,2021,2022,2023)
-pred #pred HDI for 2020 to 2023
+#####################################################full data 5 years project(Argentina only)
 
-###############################################testing accuracy of t-4 method using train-test
-#seperate data into train and test to check if t-4 method is valid
-wdata
-library(caTools)
-set.seed(2004)
+library(rpart)
+library(rpart.plot)	
+LE4
+var = LE4[c(1:4),] #to be used as variables to predict 2015-2018
+var
 
-# 70% trainset. Stratify on Y = mpg. Caution: Sample size only 32 in this example.
-train <- sample.split(Y = wdata$HDI, SplitRatio = 0.7)
-trainset <- subset(wdata, train == T)
-testset <- subset(wdata, train == F)
+LE5=LE4[c(5:24),]#remainding years to be used in model
+LE5
 
-# Checking the distribution of Y is similar in trainset vs testset.
-summary(trainset$HDI)
-summary(testset$HDI)
+#use cart to predict
+cart11 <- rpart(HDI ~ .-year, data = LE5, method = 'anova', control = rpart.control(minsplit = 2, cp = 0))
 
-# Develop model on trainset
-m5 <- lm(HDI ~ Life_Expectency_Index,data = trainset)
-summary(m5)
-residuals(m5) 
+plotcp(cart11)
 
-# Residuals = Error = Actual mpg - Model Predicted mpg
-RMSE.m5.train <- sqrt(mean(residuals(m5)^2))  # RMSE on trainset based on m5 model.
-summary(abs(residuals(m5)))  # Check Min Abs Error and Max Abs Error.
+print(cart11)
 
-# Apply model from trainset to predict on testset.
-predict.m5.test <- predict(m5, newdata = testset)
-testset.error <- testset$HDI - predict.m5.test
+CVerror.cap <- cart11$cptable[which.min(cart11$cptable[,"xerror"]), "xerror"] + cart11$cptable[which.min(cart11$cptable[,"xerror"]), "xstd"]
+
+i <- 1; j<- 4
+while (cart11$cptable[i,j] > CVerror.cap) {
+  i <- i + 1
+}
+cp.opt = ifelse(i > 1, sqrt(cart11$cptable[i,1] * cart11$cptable[i-1,1]), 1)
+
+cart22 <- prune(cart11, cp = cp.opt)
+printcp(cart22, digits = 3)
+
+
+print(cart22)
+
+rpart.plot(cart22, nn = T, main = "Optimal Tree in predicting HDI")
+## The number inside each node represent the mean value of Y.
+
+cart22$variable.importance
+
+summary(cart22)
+
+
+test.predict = predict(cart22, newdata = var)
+testset.error <- var$HDI - test.predict
 
 # Testset Errors
 RMSE.m5.test <- sqrt(mean(testset.error^2))
 summary(abs(testset.error))
 
-RMSE.m5.train 
-RMSE.m5.test ##predicts well enough
-
-
-##Using trainset to predict 2020 - 2023
-
-pred1=data[27:30]
-pred.hdi1 = predict(m5,newdata=pred1)
-pred1$pred_HDI=pred.hdi1
-
-pred1$HDI=NULL
-pred1$pred_year = c(2020,2021,2022,2023)
-pred1 #pred HDI for 2020 to 2023
+RMSE.m5.test
 
 
 
-################################################################CART
-library(rpart)
-library(rpart.plot)	
+######################################################################### 1 year project
+LE1y=LE1
+
+LE1y$HDI= shift(LE1$HDI, 1)
+LE1y
+
+LE1y1=LE1y[order(-LE1y$year)]
+LE1y1
+
+LE1y2=LE1y1[year<2014,]
+LE1y2 = LE1y2[!is.na(LE4$HDI), ]  
+LE1y2
 
 
-cart1 <- rpart(HDI ~ Education_Index+Life_Expectency_Index+Income_Index, data = wdata, method = 'anova', control = rpart.control(minsplit = 2, cp = 0))
+LE6=LE1y2[c(2:24),]
+LE6
+var1 = LE1y2[1,]
+var1
 
-plotcp(cart1)
+cart111 <- rpart(HDI ~ .-year, data = LE6, method = 'anova', control = rpart.control(minsplit = 2, cp = 0))
 
-print(cart1)
+plotcp(cart111)
 
-CVerror.cap <- cart1$cptable[which.min(cart1$cptable[,"xerror"]), "xerror"] + cart1$cptable[which.min(cart1$cptable[,"xerror"]), "xstd"]
+print(cart111)
+
+CVerror.cap <- cart111$cptable[which.min(cart111$cptable[,"xerror"]), "xerror"] + cart111$cptable[which.min(cart111$cptable[,"xerror"]), "xstd"]
 
 i <- 1; j<- 4
-while (cart1$cptable[i,j] > CVerror.cap) {
+while (cart111$cptable[i,j] > CVerror.cap) {
   i <- i + 1
 }
-cp.opt = ifelse(i > 1, sqrt(cart1$cptable[i,1] * cart1$cptable[i-1,1]), 1)
+cp.opt = ifelse(i > 1, sqrt(cart111$cptable[i,1] * cart111$cptable[i-1,1]), 1)
 
-cart2 <- prune(cart1, cp = cp.opt)
-printcp(cart2, digits = 3)
+cart222 <- prune(cart111, cp = cp.opt)
+printcp(cart222, digits = 3)
 
 
-print(cart2)
+print(cart222)
 
-rpart.plot(cart2, nn = T, main = "Optimal Tree in mtcars")
+rpart.plot(cart222, nn = T, main = "Optimal Tree in predicting HDI")
 ## The number inside each node represent the mean value of Y.
 
-cart2$variable.importance
+cart222$variable.importance
 
-summary(cart2)
-##Doesn't make sense to use cart in this case as we restrict possible values of
-## HDI to a few averages
+summary(cart222)
+
+
+
+
+test.predict1 = predict(cart222, newdata = var1)
+testset.error1 <- var1$HDI - test.predict1
+
+# Testset Errors
+RMSE.m5.test1 <- sqrt(mean(testset.error1^2))
+summary(abs(testset.error1))
+
+RMSE.m5.test1
+
+
+
+#####################################comparing the 3 projections
+
+RMSE
+RMSE.m5.test
+RMSE.m5.test1
+
+
+
+
+
+######################################################################### All countries
+
+AC1 = fread("All countries LE factors.csv")
+library(caTools)
+set.seed(2004)
+AC1
+
+
+
+AC=AC1
+AC$country=NULL
+AC$year=NULL
+AC
+
+ggplot(data=AC1,aes(x=greenhouse_gas_per_capita,y=hdi))+geom_point()+labs(title="Year vs Education_Index")
+
+
+corrplot(cor(AC), type = "upper")
+
+
+
+
+# 70% trainset. Stratify on Y = mpg. Caution: Sample size only 32 in this example.
+train <- sample.split(Y = AC$hdi, SplitRatio = 0.7)
+trainset <- subset(AC, train == T)
+testset <- subset(AC, train == F)
+
+# Checking the distribution of Y is similar in trainset vs testset.
+summary(trainset$hdi)
+summary(testset$hdi)
+
+# Develop model on trainset
+mAC <- lm(hdi~.,data = trainset)
+summary(mAC)
+residuals(mAC) 
+
+vif(mAC)
+
+
+par(mfrow = c(2,2))
+plot(mAC)
+par(mfrow = c(1,1))
+
+
+
+# Residuals = Error = Actual mpg - Model Predicted mpg
+RMSE.mAC.train <- sqrt(mean(residuals(mAC)^2))  # RMSE on trainset based on mAC model.
+summary(abs(residuals(mAC)))  # Check Min Abs Error and Max Abs Error.
+
+# Apply model from trainset to predict on testset.
+predict.mAC.test <- predict(mAC, newdata = testset)
+testset.error <- testset$hdi - predict.mAC.test
+
+# Testset Errors
+RMSE.mAC.test <- sqrt(mean(testset.error^2))
+summary(abs(testset.error))
+
+RMSE.mAC.train 
+RMSE.mAC.test
+
+
+
+AC1[country=="Argentina"&year>=2010]
+
+
+pred1=AC1[country=="Argentina"&year>=2010]
+pred1 
+pred.hdi = predict(mAC,newdata=pred1)
+pred.hdi
+
+error=pred1$hdi-pred.hdi
+RMSE_p<- sqrt(mean(pred.hdi^2))
+RMSE_p #using all countries vastly disprove accuracy of model
+
+
+
 
