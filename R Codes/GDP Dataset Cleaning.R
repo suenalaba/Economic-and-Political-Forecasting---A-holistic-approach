@@ -225,7 +225,7 @@ totalreserves.dt #check if done correctly
 #Only want data from 1990 onwards
 totalreserves.dt <- totalreserves.dt[,c(1,35:64)]
 
-#convert columns that are Years to become Rows, New columns created will be Years & "Inflation Rate" 
+#convert columns that are Years to become Rows, New columns created will be Years & "Total Reserves" 
 totalreserves.dt <- gather(totalreserves.dt, Year, 'Total Reserves', 2:31, na.rm = FALSE, convert = FALSE)
 setDT(totalreserves.dt)
 
@@ -637,16 +637,16 @@ setwd("C:/Users/joshua/Downloads/BC2406 Analytics I/BC2406 AY21 Team Assignment 
 #export the cleaned datasets using write.csv
 #write.csv("datasetname,"filename.....")
 
-write.csv(allcountries.linreg, "allcountries.linreg.csv")
+write.csv(allcountries.linreg, "allcountries.linreg.csv",row.names = FALSE)
 
-write.csv(developedcountries.linreg, "developedcountries.linreg.csv")
-write.csv(developingcountries.linreg, "developingcountries.linreg.csv")
-write.csv(leastdeveloped.linreg, "leastdeveloped.linreg.csv")
-write.csv(transitioningcountries.linreg,"transitioningcountries.linreg.csv")
+write.csv(developedcountries.linreg, "developedcountries.linreg.csv",row.names = FALSE)
+write.csv(developingcountries.linreg, "developingcountries.linreg.csv",row.names = FALSE)
+write.csv(leastdeveloped.linreg, "leastdeveloped.linreg.csv",row.names = FALSE)
+write.csv(transitioningcountries.linreg,"transitioningcountries.linreg.csv",row.names = FALSE)
 
-write.csv(developedcountries.cart,"developedcountries.cart.csv")
-write.csv(developingcountries.cart,"developingcountries.cart.csv")
-write.csv(leastdeveloped.cart,"leastdeveloped.cart.csv")
-write.csv(transitioningcountries.cart,"transitioningcountries.cart.csv")
+write.csv(developedcountries.cart,"developedcountries.cart.csv",row.names = FALSE)
+write.csv(developingcountries.cart,"developingcountries.cart.csv",row.names = FALSE)
+write.csv(leastdeveloped.cart,"leastdeveloped.cart.csv",row.names = FALSE)
+write.csv(transitioningcountries.cart,"transitioningcountries.cart.csv",row.names = FALSE)
 
-write.csv(forecast_gdp,"forecast_gdp.csv")
+write.csv(forecast_gdp,"forecast_gdp.csv",row.names = FALSE)

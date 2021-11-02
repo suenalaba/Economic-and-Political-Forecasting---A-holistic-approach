@@ -10,6 +10,7 @@ library(corrplot)
 library(vtable)
 library(Hmisc)
 library(xtable)
+library(MLmetrics)
 
 #set working directory here to import files...
 setwd("C:/Users/joshua/Downloads/BC2406 Analytics I/BC2406 AY21 Team Assignment and Project/Datasets Cleaned")
@@ -21,25 +22,25 @@ setwd("C:/Users/joshua/Downloads/BC2406 Analytics I/BC2406 AY21 Team Assignment 
 #===============================================================================
 
 #Linear regression to forecast FSI(Y+1)
-developed_countries_linreg1 <- fread("developed_countries_linreg1.csv",drop=1)
-developing_countries_linreg1 <- fread("developing_countries_linreg1.csv",drop=1)
-leastdeveloped_linreg1 <- fread("leastdeveloped_linreg1.csv",drop=1)
-transitioning_linreg1 <- fread("transitioning_linreg1.csv",drop=1)
+developed_countries_linreg1 <- fread("developed_countries_linreg1.csv")
+developing_countries_linreg1 <- fread("developing_countries_linreg1.csv")
+leastdeveloped_linreg1 <- fread("leastdeveloped_linreg1.csv")
+transitioning_linreg1 <- fread("transitioning_linreg1.csv")
 
 #Linear regression to forecast FSI(Y+4)
-developed_countries_linreg4 <- fread("developed_countries_linreg4.csv",drop=1)
-leastdeveloped_linreg4 <- fread("leastdeveloped_linreg4.csv",drop=1)
-developing_countries_linreg4 <- fread("developing_countries_linreg4.csv",drop=1)
-transitioning_linreg4 <- fread("transitioning_linreg4.csv",drop=1)
+developed_countries_linreg4 <- fread("developed_countries_linreg4.csv")
+leastdeveloped_linreg4 <- fread("leastdeveloped_linreg4.csv")
+developing_countries_linreg4 <- fread("developing_countries_linreg4.csv")
+transitioning_linreg4 <- fread("transitioning_linreg4.csv")
 
 #CART to forecast FSI(Y+1)
-developed_countries_cart1 <- fread("developed_countries_cart1.csv",drop=1,stringsAsFactors = TRUE)
-developing_countries_cart1 <- fread("developing_countries_cart1.csv",drop=1,stringsAsFactors = TRUE)
-leastdeveloped_cart1 <- fread("leastdeveloped_cart1.csv",drop=1,stringsAsFactors = TRUE)
-transitioning_cart1 <- fread("transitioning_cart1.csv",drop=1,stringsAsFactors = TRUE)
+developed_countries_cart1 <- fread("developed_countries_cart1.csv",stringsAsFactors = TRUE)
+developing_countries_cart1 <- fread("developing_countries_cart1.csv",stringsAsFactors = TRUE)
+leastdeveloped_cart1 <- fread("leastdeveloped_cart1.csv",stringsAsFactors = TRUE)
+transitioning_cart1 <- fread("transitioning_cart1.csv",stringsAsFactors = TRUE)
 
 #CART to forecast FSI(Y+4)
-FSI_cart4 <- fread("FSI_cart4.csv",drop=1,stringsAsFactors = TRUE)
+FSI_cart4 <- fread("FSI_cart4.csv",stringsAsFactors = TRUE)
 
 
 
@@ -268,6 +269,7 @@ developed_prediction <- data.frame(Predicted = predict.test,  # Create data for 
 developed_plot <- ggplot(developed_prediction,                                     
        aes(x = Predicted,
            y = Actual)) +
+  ggtitle("Developed Countries FSI(Year+1)") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -330,7 +332,7 @@ cp.opt = ifelse(i > 1, sqrt(cart1$cptable[i,1] * cart1$cptable[i-1,1]), 1) #calc
 
 cart2 <- prune(cart1, cp = cp.opt)
 
-rpart.plot(cart2, nn=T, tweak=2.0, main = "Optimal Tree for Fragility Category (Year+1) for developed countries")
+rpart.plot(cart2, nn=T, tweak=2.1, main = "Optimal Tree for Fragility Category (Year+1) for developed countries")
 
 print(cart2)
 
@@ -499,6 +501,7 @@ developing_prediction <- data.frame(Predicted = predict.test,  # Create data for
 developing_plot <- ggplot(developing_prediction,                                     
                          aes(x = Predicted,
                              y = Actual)) +
+  ggtitle("Developing Countries FSI(t+1)") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -560,7 +563,8 @@ cp.opt = ifelse(i > 1, sqrt(cart1$cptable[i,1] * cart1$cptable[i-1,1]), 1) #calc
 
 cart2 <- prune(cart1, cp = cp.opt)
 
-rpart.plot(cart2, nn=T, main = "Optimal Tree for Fragility_Category (Year+1) for developing countries")
+rpart.plot(cart2, nn=T, tweak = 1.5, fallen.leaves=FALSE, box.palette = "RdYlGn", main = "Optimal Tree for Fragility_Category (Year+1) for developing countries")
+prp(cart2) #to get better visual of decision making
 
 print(cart2)
 
@@ -711,6 +715,7 @@ least_developed_prediction <- data.frame(Predicted = predict.test,  # Create dat
 least_developed_plot <- ggplot(least_developed_prediction,                                     
                          aes(x = Predicted,
                              y = Actual)) +
+  ggtitle("Least developed Countries FSI(t+1)") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -773,7 +778,9 @@ cp.opt = ifelse(i > 1, sqrt(cart1$cptable[i,1] * cart1$cptable[i-1,1]), 1) #calc
 
 cart2 <- prune(cart1, cp = cp.opt)
 
-rpart.plot(cart2, nn=T, tweak = 1, main = "Optimal Tree for Fragility_Category (Year+1) for least developed countries")
+rpart.plot(cart2, nn=T, fallen.leaves = FALSE, box.palette = "RdYlGn", tweak= 1.3, main = "Optimal Tree for Fragility_Category (Year+1) for least developed countries")
+
+prp(cart2) #to get a better view of the decision tree
 
 print(cart2)
 
@@ -934,6 +941,7 @@ transitioning_prediction <- data.frame(Predicted = predict.test,  # Create data 
 transitioning_plot <- ggplot(transitioning_prediction,                                     
                          aes(x = Predicted,
                              y = Actual)) +
+  ggtitle("Transitioning Economies FSI(t+1)") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -1171,6 +1179,7 @@ developed_prediction4 <- data.frame(Predicted = predict.test,  # Create data for
 developed_plot4 <- ggplot(developed_prediction4,                                     
                          aes(x = Predicted,
                              y = Actual)) +
+  ggtitle("Developed Economies FSI(t+4)") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -1309,6 +1318,7 @@ developing_prediction4 <- data.frame(Predicted = predict.test,  # Create data fo
 developing_plot4 <- ggplot(developing_prediction4,                                     
                           aes(x = Predicted,
                               y = Actual)) +
+  ggtitle("Developing Countries FSI(t+4)") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -1457,6 +1467,7 @@ least_developed_prediction4 <- data.frame(Predicted = predict.test,  # Create da
 least_developed_plot4 <- ggplot(least_developed_prediction4,                                     
                           aes(x = Predicted,
                               y = Actual)) +
+  ggtitle("Least Developed Economies FSI(t+4)") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -1588,6 +1599,7 @@ summary(abs(testset.error))
 
 RMSE.trainmodel 
 RMSE.test 
+MAPE(predict.test, testset$`FSI (Year+4)`)
 
 #Visualise our predictions
 
@@ -1597,6 +1609,7 @@ transitioning_prediction4 <- data.frame(Predicted = predict.test,  # Create data
 transitioning_plot4 <- ggplot(transitioning_prediction4,                                     
                                 aes(x = Predicted,
                                     y = Actual)) +
+  ggtitle("Transitioning economies FSI (t+4)") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -1622,7 +1635,7 @@ transitioning_plot4
 
 #For CART, missing values are handled via surrogates & outliers will tend towards the leaf node
 #Therefore, we can skip the step of removing outliers/NA
-cart4_fragility <- FSI_cart4[,c(3:13,15)]
+cart4_fragility <- FSI_cart4[,c(3:13,15,16)]
 #Step 1: Train-test split for CART
 
 set.seed(2004)
@@ -1657,7 +1670,7 @@ cp.opt = ifelse(i > 1, sqrt(cart1$cptable[i,1] * cart1$cptable[i-1,1]), 1) #calc
 
 cart2 <- prune(cart1, cp = cp.opt)
 
-rpart.plot(cart2, nn=T, tweak = 1, main = "Optimal Tree for Fragility_Category (Year+4)")
+rpart.plot(cart2, nn=T, tweak = 1.5, fallen.leaves=FALSE, box.palette = "RdYlGn",main = "Optimal Tree for Fragility_Category (Year+4)")
 
 print(cart2)
 
@@ -1668,11 +1681,11 @@ summary(cart2)
 scaledVarImpt <- round(100*cart2$variable.importance/sum(cart2$variable.importance))
 scaledVarImpt[scaledVarImpt > 0]
 #CART identifies the most important variables to predict FSI(Year+4) as:
-# 1: Human Development Index 24%
-# 2: Rule of Law 16%
-# 3: GDP Per Capita 14%
-# 4: Corruption Perception Index 13%
-# 5: No violence and Voice & Accountability 12%
+# 1: FSI 27%
+# 2: Human Development Index 14%
+# 3: Rule of Law 13%
+# 4: Voice & Accountability 12%
+# 5: GDP Per Capita 12%
 
 #Lets see how well our model performs
 cart.predict <- predict(cart2, newdata = testset, type = "class")
@@ -1684,11 +1697,16 @@ table
 # Overall Accuracy
 mean(cart.predict == testset$`Fragility_Category (Year+4)`)
 
-#By adding a control variable for the type of economy, the model predicts reasonably well with 78.5% accuracy.
+#By adding a control variable for the type of economy, the model predicts reasonably well with 74.7% accuracy.
 
 #Let's try to predict Argentina's FSI in 2020 based on 2016 data. 
 #We can do this because our model did not "see" the actual 2020 data.
 #Argentina's actual FSI in 2020 is 46.1 which falls in the Stable Range
-argentina_fsi_2020_cart <- predict(cart2,FSI_data[Year == '2016' & `Country Name` == "Argentina"],type = "class" )
+#extract Argentina and set it to be a Developing Country
+argentina_fsi_2016 <- FSI_data[Year == '2016' & `Country Name` == "Argentina"]
+argentina_fsi_2016$economy_type = "Developing"
+factor(argentina_fsi_2016$economy_type)
+argentina_fsi_2020_cart <- predict(cart2,argentina_fsi_2016,type = "class" )
 argentina_fsi_2020_cart
 #Likewise, CART predicts that 2020 FSI for Argentina will be Stable.
+

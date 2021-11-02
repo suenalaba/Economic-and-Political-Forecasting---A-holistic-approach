@@ -10,6 +10,7 @@ library(corrplot)
 library(vtable)
 library(Hmisc)
 library(xtable)
+library(MLmetrics)
 
 #set working directory here to import files...
 setwd("C:/Users/joshua/Downloads/BC2406 Analytics I/BC2406 AY21 Team Assignment and Project/Datasets Cleaned")
@@ -19,19 +20,19 @@ setwd("C:/Users/joshua/Downloads/BC2406 Analytics I/BC2406 AY21 Team Assignment 
 #Importing datasets for GDP Per Capita PPP Regression Analysis
 
 #===============================================================================
-#Note, drop 1st column, because of the nature of csv file after fwrite.
 
-allcountries.linreg <- fread("allcountries.linreg.csv",drop=1)
 
-developedcountries.linreg <- fread("developedcountries.linreg.csv",drop=1)
-developingcountries.linreg <- fread("developingcountries.linreg.csv",drop=1)
-leastdeveloped.linreg <- fread("leastdeveloped.linreg.csv",drop=1)
-transitioningcountries.linreg <- fread("transitioningcountries.linreg.csv",drop=1)
+allcountries.linreg <- fread("allcountries.linreg.csv")
 
-developedcountries.cart <- fread("developedcountries.cart.csv",drop=1)
-developingcountries.cart <- fread("developingcountries.cart.csv",drop=1)
-leastdeveloped.cart <- fread("leastdeveloped.cart.csv",drop=1)
-transitioningcountries.cart <- fread("transitioningcountries.cart.csv",drop=1)
+developedcountries.linreg <- fread("developedcountries.linreg.csv")
+developingcountries.linreg <- fread("developingcountries.linreg.csv")
+leastdeveloped.linreg <- fread("leastdeveloped.linreg.csv")
+transitioningcountries.linreg <- fread("transitioningcountries.linreg.csv")
+
+developedcountries.cart <- fread("developedcountries.cart.csv")
+developingcountries.cart <- fread("developingcountries.cart.csv")
+leastdeveloped.cart <- fread("leastdeveloped.cart.csv")
+transitioningcountries.cart <- fread("transitioningcountries.cart.csv")
 
 #convert major.event to a factor variable
 allcountries.linreg$major.event <- factor(allcountries.linreg$major.event)
@@ -228,6 +229,7 @@ m.full <- lm(`GDP Per Capita PPP (Year+1)` ~ . - `Country Name` - `Year` - `GDP 
 m4 <- step(m.full)
 summary(m4)
 
+
 #Check VIF
 vif(m4)
 #VIF for exports of G&S and imports of G&S are extremely high, this means they can be predicted
@@ -294,6 +296,7 @@ developed_prediction <- data.frame(Predicted = predict.test,  # Create data for 
 developed_plot <- ggplot(developed_prediction,                                     
                          aes(x = Predicted,
                              y = Actual)) +
+  ggtitle("Model for GDP Per Capita PPP(Y+1), developed countries") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -543,6 +546,7 @@ developing_prediction <- data.frame(Predicted = predict.test,  # Create data for
 developing_plot <- ggplot(developing_prediction,                                     
                          aes(x = Predicted,
                              y = Actual)) +
+  ggtitle("GDP Per Capita PPP (Year+1), developing countries") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -557,7 +561,7 @@ developing_plot
 #We can do this because our model did not "see" the actual 2015 data.
 #Argentina's actual GDP per capita PPP in 2015 is 20105.20
 #set NAs in that particular row to be zero, to enable us to predict using linear regression.
-forecast_gdp <- fread("forecast_gdp.csv",drop=1)
+forecast_gdp <- fread("forecast_gdp.csv")
 forecast_gdp[Year == '2014' & `Country Name` == "Argentina"][is.na(forecast_gdp[Year == '2014' & `Country Name` == "Argentina"])] = 0
 argentina_GDPpercapPPP_2015_linreg <- predict(trainmodel,forecast_gdp[Year == '2014' & `Country Name` == "Argentina"])
 argentina_GDPpercapPPP_2015_linreg
@@ -645,13 +649,13 @@ RMSE.test
 #In this case, the RMSE for train model is 6238.831 while RMSE for test set is 8634.534
 #This means when CART is used to predict, on average the actual GDP Per Capita PPP (Year+1)
 #will differ from the forecasted GDP Per Capita PPP (year+1) by 8634.534.
-#Taking into consideration the range of GDP Per Capita PPP for developed countries: 1853 to 141635
+#Taking into consideration the range of GDP Per Capita PPP for developed countries: 1853 to 88246 
 #This means an average of 6.18% error in forecasting, which is reasonably strong!
 
 #Lets try to predict Argentina's GDP Per Capita PPP in 2015 using data in 2014.
 #We can do this because our model did not "see" the actual 2015 data.
 #Argentina's actual GDP Per Capita PPP in 2015 is 20105.20
-forecast_gdp <- fread("forecast_gdp.csv",drop=1)
+forecast_gdp <- fread("forecast_gdp.csv")
 forecast_gdp$major.event <- factor(forecast_gdp$major.event)
 argentina_GDPpercapPPP_2015_cart <- predict(cart2,forecast_gdp[Year == '2014' & `Country Name` == "Argentina"])
 argentina_GDPpercapPPP_2015_cart
@@ -812,6 +816,7 @@ least_developed_prediction <- data.frame(Predicted = predict.test,  # Create dat
 least_developed_plot <- ggplot(least_developed_prediction,                                     
                          aes(x = Predicted,
                              y = Actual)) +
+  ggtitle("GDP Per Capita (Year+1), least developed countries") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -1055,6 +1060,7 @@ transition_prediction <- data.frame(Predicted = predict.test,  # Create data for
 transition_plot <- ggplot(transition_prediction,                                     
                          aes(x = Predicted,
                              y = Actual)) +
+  ggtitle("GDP Per Capita (Year+1), transitioning countries") +
   geom_point() +
   geom_abline(intercept = 0,
               slope = 1,
@@ -1113,7 +1119,7 @@ cp.opt = ifelse(i > 1, sqrt(cart1$cptable[i,1] * cart1$cptable[i-1,1]), 1) #calc
 
 cart2 <- prune(cart1, cp = cp.opt)
 
-rpart.plot(cart2, nn=T, tweak = 1.0, main = "Optimal Tree for GDP Per Capita PPP (Year+1) for transitioning economies")
+rpart.plot(cart2, nn=T, tweak = 1.5, main = "Optimal Tree for GDP Per Capita PPP (Year+1) for transitioning economies")
 
 print(cart2)
 

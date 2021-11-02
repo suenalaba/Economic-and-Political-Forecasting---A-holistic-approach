@@ -402,8 +402,14 @@ levels(FSI_cart4$`Fragility_Category (Year+4)`) = c("Very sustainable","Sustaina
 #verify that the categories are changed correctly
 summary(FSI_cart4$`Fragility_Category (Year+4)`)
 
+cut.off <- c(0, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110,120)
+FSI_cart1[, `Fragility_Category (Year+1)` := cut(`FSI (Year+1)`, breaks=cut.off, include.lowest=T)]
+summary(FSI_cart1$`Fragility_Category (Year+1)`)
+levels(FSI_cart1$`Fragility_Category (Year+1)`) = c("Very sustainable","Sustainable","More Stable","Stable",
+                                                    "Less Stable","Warning","Elevated Warning","High Warning",
+                                                    "Alert","High Alert","Very High Alert")
 
-#====================================================================================================================
+#==================================================================================================================
 
 #Separating the dataset into different economies: developed, developing,least developed and transitioning economies
 
@@ -512,20 +518,20 @@ setwd("C:/Users/joshua/Downloads/BC2406 Analytics I/BC2406 AY21 Team Assignment 
 #export the cleaned datasets using write.csv
 #write.csv("datasetname,"filename.....")
 
-write.csv(developed_countries_linreg1, "developed_countries_linreg1.csv")
-write.csv(developing_countries_linreg1, "developing_countries_linreg1.csv")
-write.csv(leastdeveloped_linreg1, "leastdeveloped_linreg1.csv")
-write.csv(transitioning_linreg1, "transitioning_linreg1.csv")
+write.csv(developed_countries_linreg1, "developed_countries_linreg1.csv",row.names = FALSE)
+write.csv(developing_countries_linreg1, "developing_countries_linreg1.csv",row.names = FALSE)
+write.csv(leastdeveloped_linreg1, "leastdeveloped_linreg1.csv",row.names = FALSE)
+write.csv(transitioning_linreg1, "transitioning_linreg1.csv",row.names = FALSE)
 
-write.csv(developed_countries_linreg4,"developed_countries_linreg4.csv")
-write.csv(leastdeveloped_linreg4,"leastdeveloped_linreg4.csv")
-write.csv(developing_countries_linreg4,"developing_countries_linreg4.csv")
-write.csv(transitioning_linreg4,"transitioning_linreg4.csv")
+write.csv(developed_countries_linreg4,"developed_countries_linreg4.csv",row.names = FALSE)
+write.csv(leastdeveloped_linreg4,"leastdeveloped_linreg4.csv",row.names = FALSE)
+write.csv(developing_countries_linreg4,"developing_countries_linreg4.csv",row.names = FALSE)
+write.csv(transitioning_linreg4,"transitioning_linreg4.csv",row.names = FALSE)
 
-write.csv(developed_countries_cart1,"developed_countries_cart1.csv")
-write.csv(developing_countries_cart1,"developing_countries_cart1.csv")
-write.csv(leastdeveloped_cart1,"leastdeveloped_cart1.csv")
-write.csv(transitioning_cart1,"transitioning_cart1.csv")
+write.csv(developed_countries_cart1,"developed_countries_cart1.csv",row.names = FALSE)
+write.csv(developing_countries_cart1,"developing_countries_cart1.csv",row.names = FALSE)
+write.csv(leastdeveloped_cart1,"leastdeveloped_cart1.csv",row.names = FALSE)
+write.csv(transitioning_cart1,"transitioning_cart1.csv",row.names = FALSE)
 
-write.csv(FSI_cart4,"FSI_cart4.csv")
-write.csv(FSI_data,"FSI_data.csv")
+write.csv(FSI_cart4,"FSI_cart4.csv",row.names = FALSE)
+write.csv(FSI_data,"FSI_data.csv",row.names = FALSE)
