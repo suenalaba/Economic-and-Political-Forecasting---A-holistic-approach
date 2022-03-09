@@ -1,4 +1,4 @@
-# Analytics-I-BC2406
+# Economic and Political Forecasting with Machine Learning Paradigms
 
 Our reccomendation to the Economic Intelligence Unit: 
 A holistic approach to forecasting key fundamental indicators like GDP Per Capita PPP, Political Stability and HDI.
