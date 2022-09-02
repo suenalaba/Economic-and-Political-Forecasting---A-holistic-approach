@@ -16,8 +16,8 @@ Note: If data downloaded as xlsx, it has to be manually converted to CSV via cha
 
 
 Contributors:
-Joshua Khoo
-Nicholas Wong Yan Long
-Michelle Lam Su-Ann
-Lu Yifei
-Luo Yiying
+Joshua Khoo <br>
+Nicholas Wong Yan Long  <br>
+Michelle Lam Su-Ann  <br>
+Lu Yifei  <br>
+Luo Yiying  <br>
