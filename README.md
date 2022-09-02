@@ -15,7 +15,7 @@ Note: If data downloaded as xlsx, it has to be manually converted to CSV via cha
 
 
 
-Contributors:
+Contributors:  <br>
 Joshua Khoo <br>
 Nicholas Wong Yan Long  <br>
 Michelle Lam Su-Ann  <br>
